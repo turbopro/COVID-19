@@ -38,6 +38,20 @@ library(magrittr)
 # load data
 dat_dates <- dat_confirmed %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
 
+### US
+US_dat <- dat_dates %>%
+  filter(`Country/Region` == "US")
+
+filter(dat_dates, `Country/Region` == "Canada")
+
+day_dat <- dat_dates %>%
+  filter(Day == "1/22/20")
+
+
+CR_dat <- dat_dates %>%
+  group_by('Country/Region')
+
+
 # convert Day from 'chr' to 'Date'
 dat_dates %<>%
   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
@@ -47,10 +61,12 @@ dat_dates %<>%
 
 dat_xts <- xts(dat_dates$CaseCount, order.by = dat_dates$Day)
 names(dat_xts) <- "Count"
-plot(dat_xts, type = "h", legend.loc = 'top',
-     legend = "Test text",
-     main = "Total Confirmed", col = "blue")
-ts.plot(dat_xts, main = "Test")
+curr_len <- nrow(dat_xts)
+plot(dat_xts, type = "S", 
+     main = paste("Worlwide Confirmed Cases:", as.numeric(dat_xts$Count[curr_len]),
+                  "\nAs of:", time(dat_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+ts.plot(dat_xts, main = "Test", type = "h")
 legend("top", legend = c("Test"))
 text(dx, dy, "Test")
 
