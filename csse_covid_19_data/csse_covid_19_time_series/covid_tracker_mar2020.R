@@ -25,6 +25,9 @@ library(xts)
 
 library(tidyverse)
 dat_confirmed <- read_csv("./time_series_19-covid-Confirmed.csv")
+dat_deaths <- read_csv("./time_series_19-covid-Deaths.csv")
+dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
+
 #dat_nums <- dat_confirmed[, c(5:ncol(dat_confirmed))]
 #confirmed_mat <- colSums(dat_nums)
 #march_nums <- confirmed_mat[, c('3/1/20', )]
@@ -32,6 +35,9 @@ dat_confirmed <- read_csv("./time_series_19-covid-Confirmed.csv")
 #plot(confirmed_mat, pch = "+")
 #names(confirmed_mat)
 #barplot(confirmed_mat)
+
+########  CONFIRMED   ##########
+################################
 
 library(tidyr)
 library(magrittr)
@@ -42,7 +48,310 @@ dat_dates <- dat_confirmed %>% gather(Day, Cases, -c('Province/State', 'Country/
 US_dat <- dat_dates %>%
   filter(`Country/Region` == "US")
 
-filter(dat_dates, `Country/Region` == "Canada")
+# convert Day from 'chr' to 'Date'
+US_dat %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+US_xts <- xts(US_dat$CaseCount, order.by = US_dat$Day)
+names(US_xts) <- "Count"
+curr_len <- nrow(US_xts)
+
+plot(US_xts, type = "S", 
+     main = paste("US Confirmed Cases:", as.numeric(US_xts$Count[curr_len]),
+                  "\nAs of:", time(US_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+### NY
+NY_dat <- dat_dates %>%
+  filter(`Country/Region` == "US") %>%
+  filter(`Province/State` == "New York")
+
+# convert Day from 'chr' to 'Date'
+NY_dat %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+NY_xts <- xts(NY_dat$CaseCount, order.by = NY_dat$Day)
+names(NY_xts) <- "Count"
+curr_len <- nrow(NY_xts)
+plot(NY_xts, type = "S", 
+     main = paste("NY Confirmed Cases:", as.numeric(NY_xts$Count[curr_len]),
+                  "\nAs of:", time(NY_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### Italy
+IT_dat <- dat_dates %>%
+  filter(`Country/Region` == "Italy")
+
+# convert Day from 'chr' to 'Date'
+IT_dat %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+IT_xts <- xts(IT_dat$CaseCount, order.by = IT_dat$Day)
+names(IT_xts) <- "Count"
+curr_len <- nrow(IT_xts)
+plot(IT_xts, type = "S", 
+     main = paste("Italy Confirmed Cases:", as.numeric(IT_xts$Count[curr_len]),
+                  "\nAs of:", time(IT_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### triple plots
+par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+plot(IT_xts, type = "S", 
+     main = paste("Italy Confirmed Cases:", as.numeric(IT_xts$Count[curr_len]),
+                  "\nNY Confirmed Cases:", as.numeric(NY_xts$Count[curr_len]),
+                  "\nUS Confirmed Cases:", as.numeric(US_xts$Count[curr_len]),
+                  "                                                     Date:", time(IT_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+lines(NY_xts, type = "S", col = "blue")
+lines(US_xts, type = "S", col = "black")
+
+# plot(NY_Ds_xts, type = "S", 
+#      main = paste("NY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len])), 
+#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+# 
+# plot(US_Ds_xts, type = "S", 
+#      main = paste("US Deaths:", as.numeric(US_Ds_xts$Count[curr_len])), 
+#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### double plots
+#par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+plot(US_xts, type = "S", 
+     main = paste("\nNY Confirmed Cases:", as.numeric(NY_xts$Count[curr_len]),
+                  "\nUS Confirmed Cases:", as.numeric(US_xts$Count[curr_len]),
+                  "                                                     Date:", time(US_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+lines(NY_xts, type = "S", col = "blue")
+#lines(US_Ds_xts, type = "S", col = "black")
+
+
+########  CONFIRMED   ##########
+################################
+
+
+############# 2 ################
+##########  DEATHS  ############
+################################
+
+library(tidyr)
+library(magrittr)
+# load data
+dat_Ds <- dat_deaths %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
+
+### US
+US_Ds <- dat_Ds %>%
+  filter(`Country/Region` == "US")
+
+# convert Day from 'chr' to 'Date'
+US_Ds %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+US_Ds_xts <- xts(US_Ds$CaseCount, order.by = US_Ds$Day)
+names(US_Ds_xts) <- "Count"
+curr_len <- nrow(US_Ds_xts)
+plot(US_Ds_xts, type = "S", 
+     main = paste("US Deaths:", as.numeric(US_Ds_xts$Count[curr_len]),
+                  "\nAs of:", time(US_Ds_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+### NY
+NY_Ds <- dat_Ds %>%
+  filter(`Country/Region` == "US") %>%
+  filter(`Province/State` == "New York")
+
+# convert Day from 'chr' to 'Date'
+NY_Ds %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+NY_Ds_xts <- xts(NY_Ds$CaseCount, order.by = NY_Ds$Day)
+names(NY_Ds_xts) <- "Count"
+curr_len <- nrow(NY_Ds_xts)
+plot(NY_Ds_xts, type = "S", 
+     main = paste("NY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len]),
+                  "\nAs of:", time(NY_Ds_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### Italy
+IT_Ds <- dat_Ds %>%
+  filter(`Country/Region` == "Italy")
+
+# convert Day from 'chr' to 'Date'
+IT_Ds %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+IT_Ds_xts <- xts(IT_Ds$CaseCount, order.by = IT_Ds$Day)
+names(IT_Ds_xts) <- "Count"
+curr_len <- nrow(IT_Ds_xts)
+plot(IT_Ds_xts, type = "S", 
+     main = paste("Italy Deaths:", as.numeric(IT_Ds_xts$Count[curr_len]),
+                  "\nAs of:", time(IT_Ds_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### triple plots
+#par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+plot(IT_Ds_xts, type = "S", 
+     main = paste("Italy Deaths:", as.numeric(IT_Ds_xts$Count[curr_len]),
+                  "\nNY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len]),
+                  "\nUS Deaths:", as.numeric(US_Ds_xts$Count[curr_len]),
+                  "                                                     Date:", time(IT_Ds_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+lines(NY_Ds_xts, type = "S", col = "blue")
+lines(US_Ds_xts, type = "S", col = "black")
+
+# plot(NY_Ds_xts, type = "S", 
+#      main = paste("NY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len])), 
+#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+# 
+# plot(US_Ds_xts, type = "S", 
+#      main = paste("US Deaths:", as.numeric(US_Ds_xts$Count[curr_len])), 
+#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### double plots
+#par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+plot(US_Ds_xts, type = "S", 
+     main = paste("\nNY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len]),
+                  "\nUS Deaths:", as.numeric(US_Ds_xts$Count[curr_len]),
+                  "                                                     Date:", time(NY_Ds_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+lines(NY_Ds_xts, type = "S", col = "blue")
+#lines(US_Ds_xts, type = "S", col = "black")
+
+
+
+############# 2 ################
+##########  DEATHS  ############
+################################
+
+
+
+
+############# 3 ################
+#########  RECOVERY  ###########
+################################
+
+library(tidyr)
+library(magrittr)
+# load data
+dat_Rs <- dat_recovered %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
+
+### US
+US_Rs <- dat_Rs %>%
+  filter(`Country/Region` == "US")
+
+# convert Day from 'chr' to 'Date'
+US_Rs %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+US_Rs_xts <- xts(US_Rs$CaseCount, order.by = US_Rs$Day)
+names(US_Rs_xts) <- "Count"
+curr_len <- nrow(US_Rs_xts)
+plot(US_Rs_xts, type = "S", 
+     main = paste("US Recovered Cases:", as.numeric(US_Rs_xts$Count[curr_len]),
+                  "\nAs of:", time(US_Rs_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+### NY
+NY_Rs <- dat_Rs %>%
+  filter(`Country/Region` == "US") %>%
+  filter(`Province/State` == "New York")
+
+# convert Day from 'chr' to 'Date'
+NY_Rs %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+NY_Rs_xts <- xts(NY_Rs$CaseCount, order.by = NY_Rs$Day)
+names(NY_Rs_xts) <- "Count"
+curr_len <- nrow(NY_Rs_xts)
+plot(NY_Rs_xts, type = "S", 
+     main = paste("NY Recovered Cases:", as.numeric(NY_Rs_xts$Count[curr_len]),
+                  "\nAs of:", time(NY_Rs_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+### Italy
+IT_Rs <- dat_Rs %>%
+  filter(`Country/Region` == "Italy")
+
+# convert Day from 'chr' to 'Date'
+IT_Rs %<>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  select(c(Day, Cases)) %>%
+  group_by(Day) %>%
+  summarise(CaseCount = sum(Cases))
+
+IT_Rs_xts <- xts(IT_Rs$CaseCount, order.by = IT_Rs$Day)
+names(IT_Rs_xts) <- "Count"
+curr_len <- nrow(IT_Rs_xts)
+plot(IT_Rs_xts, type = "S", 
+     main = paste("Italy Recovered Cases:", as.numeric(IT_Rs_xts$Count[curr_len]),
+                  "\nAs of:", time(IT_Rs_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+
+### triple plots #####
+#par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+plot(IT_Rs_xts, type = "S", 
+     main = paste("Italy Recovery:", as.numeric(IT_Rs_xts$Count[curr_len]),
+                  "\nNY Recovery:", as.numeric(NY_Rs_xts$Count[curr_len]),
+                  "\nUS Recovery:", as.numeric(US_Rs_xts$Count[curr_len]),
+                  "                                                     Date:", time(IT_Ds_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+lines(NY_Rs_xts, type = "S", col = "blue")
+lines(US_Rs_xts, type = "S", col = "black")
+
+
+### double plots #####
+#par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+plot(US_Rs_xts, type = "S", 
+     main = paste("\nNY Recovery:", as.numeric(NY_Rs_xts$Count[curr_len]),
+                  "\nUS Recovery:", as.numeric(US_Rs_xts$Count[curr_len]),
+                  "                                                     Date:", time(NY_Rs_xts[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+lines(NY_Rs_xts, type = "S", col = "blue")
+
+
+
+############# 3 ################
+#########  RECOVERY  ###########
+################################
+
+
+
+############# 4 ################
+######### Worldwide ############
+################################
+
+#filter(dat_dates, `Country/Region` == "Canada")
 
 day_dat <- dat_dates %>%
   filter(Day == "1/22/20")
@@ -62,13 +371,18 @@ dat_dates %<>%
 dat_xts <- xts(dat_dates$CaseCount, order.by = dat_dates$Day)
 names(dat_xts) <- "Count"
 curr_len <- nrow(dat_xts)
+par(mar = c(5, 5, 5, 5))
+getOption("scipen")
+opt <- options("scipen" = 20)
+getOption("scipen")
 plot(dat_xts, type = "S", 
      main = paste("Worlwide Confirmed Cases:", as.numeric(dat_xts$Count[curr_len]),
                   "\nAs of:", time(dat_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
-ts.plot(dat_xts, main = "Test", type = "h")
-legend("top", legend = c("Test"))
-text(dx, dy, "Test")
+
+#ts.plot(dat_xts, main = "Test", type = "h")
+#legend("top", legend = c("Test"))
+#text(dx, dy, "Test")
 
 plot(stks, legend.loc='top', major.ticks = "years",
      grid.ticks.on = "years", grid.col = "lightgray")
