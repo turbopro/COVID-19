@@ -53,7 +53,7 @@ US_dat %<>%
   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
   select(c(Day, Cases)) %>%
   group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
 
 US_xts <- xts(US_dat$CaseCount, order.by = US_dat$Day)
 names(US_xts) <- "Count"
@@ -106,7 +106,7 @@ plot(IT_xts, type = "S",
 
 
 ### triple plots
-par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
+#par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
 plot(IT_xts, type = "S", 
      main = paste("Italy Confirmed Cases:", as.numeric(IT_xts$Count[curr_len]),
                   "\nNY Confirmed Cases:", as.numeric(NY_xts$Count[curr_len]),
@@ -158,7 +158,7 @@ US_Ds %<>%
   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
   select(c(Day, Cases)) %>%
   group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
 
 US_Ds_xts <- xts(US_Ds$CaseCount, order.by = US_Ds$Day)
 names(US_Ds_xts) <- "Count"
@@ -266,7 +266,7 @@ US_Rs %<>%
   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
   select(c(Day, Cases)) %>%
   group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
 
 US_Rs_xts <- xts(US_Rs$CaseCount, order.by = US_Rs$Day)
 names(US_Rs_xts) <- "Count"
@@ -356,19 +356,18 @@ lines(NY_Rs_xts, type = "S", col = "blue")
 day_dat <- dat_dates %>%
   filter(Day == "1/22/20")
 
-
 CR_dat <- dat_dates %>%
   group_by('Country/Region')
 
 
 # convert Day from 'chr' to 'Date'
-dat_dates %<>%
-  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+dat_conf <-
+  mutate(dat_dates, Day = as.Date(Day, format = "%m/%d/%y")) %>%
   select(c(Day, Cases)) %>%
   group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
 
-dat_xts <- xts(dat_dates$CaseCount, order.by = dat_dates$Day)
+dat_xts <- xts(dat_conf$CaseCount, order.by = dat_conf$Day)
 names(dat_xts) <- "Count"
 curr_len <- nrow(dat_xts)
 par(mar = c(5, 5, 5, 5))
