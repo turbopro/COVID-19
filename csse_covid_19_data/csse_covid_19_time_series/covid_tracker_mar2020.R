@@ -1,5 +1,5 @@
-########### MATH OF FINANCE ############
-###############################################
+########### COVID-19 TRACKER ############
+
 
 # remove all variable except functions in environment
 rm(list = setdiff(ls(), lsf.str()))
@@ -15,9 +15,7 @@ install.packages("rJava")
 ## in terminal:
 ## apt-get install lib64pcre2-devel
 
-#####################################################
-##### Hedging-Arbitrage
-#####################################################
+######## load data #####################
 
 ### libraries
 library(astsa)
@@ -28,6 +26,21 @@ dat_confirmed <- read_csv("./time_series_19-covid-Confirmed.csv")
 dat_deaths <- read_csv("./time_series_19-covid-Deaths.csv")
 dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
 
+## get daily figures
+# dat_daily <- read_csv("./daily_03-21-2020.csv")
+# str(dat_daily)
+# dat_daily %<>% select(., -c(Latitude, Longitude))
+
+# select countries
+# countries <- c("China", "Italy", "Spain", "US", "Germany")
+# daily_country <- filter(dat_daily, `Country/Region` == countries) 
+# 
+# daily_confirmed <- dat_daily %>% group_by(`Country/Region`) %>% 
+#   summarise(ConfCount = sum(Confirmed, na.rm = TRUE)) %>%
+#   filter(ConfCount > 5000)
+# daily_confirmed
+# daily_country[1:20,]
+
 #dat_nums <- dat_confirmed[, c(5:ncol(dat_confirmed))]
 #confirmed_mat <- colSums(dat_nums)
 #march_nums <- confirmed_mat[, c('3/1/20', )]
@@ -37,12 +50,116 @@ dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
 #barplot(confirmed_mat)
 
 ########  CONFIRMED   ##########
-################################
 
 library(tidyr)
 library(magrittr)
-# load data
+
+countries <- c("China", "Italy", "US")
+
+# load data for confirmed
 dat_dates <- dat_confirmed %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
+
+dat_tidy <- dat_confirmed %>% 
+  gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) %>%
+  select(`Country/Region`, Day, Cases) %>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  group_by(Day, `Country/Region`) %>%
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
+  
+names(dat_tidy) <- c("Day", "Country", "ConfirmedCases")
+dat_countries <- NULL
+for(c in countries) {
+  dat_countries <- bind_rows( dat_countries, filter(dat_tidy, Country == c))
+}
+
+ggplot(dat_countries, aes(x = Day, y = ConfirmedCases, Country)) +
+  geom_step(aes(color = Country), direction = "vh", type = "S") +
+  annotate("text", x = as.Date("2020-03-18"), y = 77000, 
+           label = paste0("China = ", dat_countries$ConfirmedCases[60]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-18"), y = 56000, 
+           label = paste0("Italy = ", dat_countries$ConfirmedCases[120]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-20"), y = 28000, 
+           label = paste0("US = ", dat_countries$ConfirmedCases[180]), 
+           fontface = "bold", size = 3) +
+  ggtitle("Confirmed Cases as of March 21 2020")
+
+
+# deaths
+dat_tidy <- dat_deaths %>% 
+  gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) %>%
+  select(`Country/Region`, Day, Cases) %>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  group_by(Day, `Country/Region`) %>%
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
+
+names(dat_tidy) <- c("Day", "Country", "Deaths")
+head(dat_tidy)
+
+# get data for the countries
+# select countries
+#countries <- c("China", "Italy", "Spain", "US", "Germany")
+
+dat_countries <- NULL
+for(c in countries) {
+  dat_countries <- bind_rows( dat_countries, filter(dat_tidy, Country == c))
+}
+str(dat_countries)
+head(dat_countries)
+
+ggplot(dat_countries, aes(x = Day, y = Deaths, Country)) +
+  geom_step(aes(color = Country), direction = "vh", type = "S") +
+  annotate("text", x = as.Date("2020-03-12"), y = 3300, 
+           label = paste0("China = ", dat_countries$Deaths[60]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-17"), y = 4800, 
+           label = paste0("Italy = ", dat_countries$Deaths[120]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-19"), y = 500, 
+           label = paste0("US = ", dat_countries$Deaths[180]), 
+           fontface = "bold", size = 3) +
+  ggtitle("Deaths as of March 21 2020")
+
+
+# recovery
+dat_tidy <- dat_recovered %>% 
+  gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) %>%
+  select(`Country/Region`, Day, Cases) %>%
+  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+  group_by(Day, `Country/Region`) %>%
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
+
+names(dat_tidy) <- c("Day", "Country", "Recoveries")
+head(dat_tidy)
+
+# get data for the countries
+# select countries
+#countries <- c("China", "Italy", "Spain", "US", "Germany")
+
+dat_countries <- NULL
+for(c in countries) {
+  dat_countries <- bind_rows( dat_countries, filter(dat_tidy, Country == c))
+}
+str(dat_countries)
+head(dat_countries)
+
+ggplot(dat_countries, aes(x = Day, y = Recoveries, Country)) +
+  geom_step(aes(color = Country), direction = "vh", type = "S") +
+  annotate("text", x = as.Date("2020-03-17"), y = 74000, 
+           label = paste0("China = ", dat_countries$Recoveries[60]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-20"), y = 7500, 
+           label = paste0("Italy = ", dat_countries$Recoveries[120]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-19"), y = 1500, 
+           label = paste0("US = ", dat_countries$Recoveries[180]), 
+           fontface = "bold", size = 3) +
+  ggtitle("Recoveries as of March 21 2020")
+
+
+
+
 
 ### US
 US_dat <- dat_dates %>%
@@ -136,13 +253,8 @@ lines(NY_xts, type = "S", col = "blue")
 #lines(US_Ds_xts, type = "S", col = "black")
 
 
-########  CONFIRMED   ##########
-################################
-
-
-############# 2 ################
-##########  DEATHS  ############
-################################
+########  CONFIRMED END ##########
+###########  DEATHS  #############
 
 library(tidyr)
 library(magrittr)
@@ -239,18 +351,8 @@ plot(US_Ds_xts, type = "S",
 lines(NY_Ds_xts, type = "S", col = "blue")
 #lines(US_Ds_xts, type = "S", col = "black")
 
-
-
-############# 2 ################
-##########  DEATHS  ############
-################################
-
-
-
-
-############# 3 ################
-#########  RECOVERY  ###########
-################################
+##########  DEATHS END  ############
+##########  RECOVERY  ##############
 
 library(tidyr)
 library(magrittr)
@@ -341,15 +443,9 @@ lines(NY_Rs_xts, type = "S", col = "blue")
 
 
 
-############# 3 ################
-#########  RECOVERY  ###########
-################################
 
-
-
-############# 4 ################
-######### Worldwide ############
-################################
+#########  RECOVERY END ###########
+#########  Worldwide ##############
 
 #filter(dat_dates, `Country/Region` == "Canada")
 
@@ -683,3 +779,52 @@ ggplot(diamonds, aes(clarity, carat, col = price)) +
 # 
 # plot.ts(test00)
 # barplot(test00)
+
+
+### plotting 2 data frames ##############
+# Basic line plot
+ggplot(economics, aes(x = date, y = unemploy/pop)) +
+  geom_line()
+
+# Expand the following command with geom_rect() to draw the recess periods
+ggplot(economics, aes(x = date, y = unemploy/pop)) +
+  geom_rect(data = recess,
+            aes( xmin = begin, xmax = end, ymin = -Inf, ymax = Inf),
+            inherit.aes = FALSE, fill = "red", alpha = 0.2) +
+  geom_line()
+
+
+# Multiple time series, part 1
+# In the data chapter we discussed how the form of your data affects how you 
+# can plot it. Here, you'll explore that topic in the context of multiple time series.
+# 
+# The dataset you'll use contains the global capture rates of seven salmon species from 1950 - 2010.
+# 
+# In your workspace, the following dataset is available:
+#   
+#   fish.species: Each variable (column) is a Salmon Species and each observation (row) is one Year.
+# To get a multiple time series plot, however, both Year and Species should be in their own column. 
+# You need tidy data: one variable per column. Once you have that you can get the plot shown in the 
+# viewer by mapping Year to the x aesthetic and Species to the color aesthetic.
+# 
+# You'll use the gather() function of the tidyr package, which is already loaded for you.
+# 
+# Instructions
+# 100 XP
+# Use gather() to move from fish.species to a tidy data frame, fish.tidy. This data frame should 
+# have three columns: Year (int), Species (factor) and Capture (int).
+# gather() takes four arguments: the original data frame (fish.species), the name of the key 
+# column (Species), the name of the value column (Capture) and the name of the grouping variable, 
+# with a minus in front (-Year). They can all be specified as object names (i.e. no "").
+
+# Check the structure as a starting point
+#str(fish.species)
+
+# Use gather to go from fish.species to fish.tidy
+#fish.tidy <- gather(fish.species, Species, Capture, -Year)
+
+# Recreate the plot shown on the right
+# ggplot(fish.tidy, aes(x = Year, y = Capture, color = Species)) +
+#   geom_line()
+
+
