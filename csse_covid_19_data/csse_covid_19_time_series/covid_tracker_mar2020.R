@@ -22,9 +22,14 @@ library(astsa)
 library(xts)
 
 library(tidyverse)
-dat_confirmed <- read_csv("./time_series_19-covid-Confirmed.csv")
-dat_deaths <- read_csv("./time_series_19-covid-Deaths.csv")
-dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
+# dat_confirmed <- read_csv("./time_series_19-covid-Confirmed.csv")
+# dat_deaths <- read_csv("./time_series_19-covid-Deaths.csv")
+# dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
+
+dat_confirmed <- read_csv("./time_series_covid19_confirmed_global.csv")
+dat_deaths <- read_csv("./time_series_covid19_deaths_global.csv")
+# dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
+
 
 ## get daily figures
 # dat_daily <- read_csv("./daily_03-21-2020.csv")
@@ -77,10 +82,10 @@ ggplot(dat_countries, aes(x = Day, y = ConfirmedCases, Country)) +
   annotate("text", x = as.Date("2020-03-18"), y = 79000, 
            label = paste0("China = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]/3]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-20"), y = 61000, 
+  annotate("text", x = as.Date("2020-03-20"), y = 67000, 
            label = paste0("Italy = ", dat_countries$ConfirmedCases[2 * (dim(dat_countries)[1]/3)]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-21"), y = 35000, 
+  annotate("text", x = as.Date("2020-03-21"), y = 46000, 
            label = paste0("US = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
   ggtitle("Confirmed Cases as of March 22 2020")
@@ -113,10 +118,10 @@ ggplot(dat_countries, aes(x = Day, y = Deaths, Country)) +
   annotate("text", x = as.Date("2020-03-13"), y = 3400, 
            label = paste0("China = ", dat_countries$Deaths[dim(dat_countries)[1]/3]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-19"), y = 5600, 
+  annotate("text", x = as.Date("2020-03-19"), y = 6300, 
            label = paste0("Italy = ", dat_countries$Deaths[2 * (dim(dat_countries)[1]/3)]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-20"), y = 600, 
+  annotate("text", x = as.Date("2020-03-20"), y = 800, 
            label = paste0("US = ", dat_countries$Deaths[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
   ggtitle("Deaths as of March 22 2020")
@@ -191,7 +196,7 @@ NY_dat %<>%
   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
   select(c(Day, Cases)) %>%
   group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
 
 NY_xts <- xts(NY_dat$CaseCount, order.by = NY_dat$Day)
 names(NY_xts) <- "Count"
@@ -211,7 +216,7 @@ IT_dat %<>%
   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
   select(c(Day, Cases)) %>%
   group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+  summarise(CaseCount = sum(Cases, na.rm = TRUE))
 
 IT_xts <- xts(IT_dat$CaseCount, order.by = IT_dat$Day)
 names(IT_xts) <- "Count"
