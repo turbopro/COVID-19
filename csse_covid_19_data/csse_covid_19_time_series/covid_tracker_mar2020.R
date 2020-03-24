@@ -74,16 +74,16 @@ for(c in countries) {
 
 ggplot(dat_countries, aes(x = Day, y = ConfirmedCases, Country)) +
   geom_step(aes(color = Country), direction = "vh", type = "S") +
-  annotate("text", x = as.Date("2020-03-18"), y = 77000, 
-           label = paste0("China = ", dat_countries$ConfirmedCases[60]), 
+  annotate("text", x = as.Date("2020-03-18"), y = 79000, 
+           label = paste0("China = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]/3]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-18"), y = 56000, 
-           label = paste0("Italy = ", dat_countries$ConfirmedCases[120]), 
+  annotate("text", x = as.Date("2020-03-20"), y = 61000, 
+           label = paste0("Italy = ", dat_countries$ConfirmedCases[2 * (dim(dat_countries)[1]/3)]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-20"), y = 28000, 
-           label = paste0("US = ", dat_countries$ConfirmedCases[180]), 
+  annotate("text", x = as.Date("2020-03-21"), y = 35000, 
+           label = paste0("US = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
-  ggtitle("Confirmed Cases as of March 21 2020")
+  ggtitle("Confirmed Cases as of March 22 2020")
 
 
 # deaths
@@ -110,16 +110,16 @@ head(dat_countries)
 
 ggplot(dat_countries, aes(x = Day, y = Deaths, Country)) +
   geom_step(aes(color = Country), direction = "vh", type = "S") +
-  annotate("text", x = as.Date("2020-03-12"), y = 3300, 
-           label = paste0("China = ", dat_countries$Deaths[60]), 
+  annotate("text", x = as.Date("2020-03-13"), y = 3400, 
+           label = paste0("China = ", dat_countries$Deaths[dim(dat_countries)[1]/3]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-17"), y = 4800, 
-           label = paste0("Italy = ", dat_countries$Deaths[120]), 
+  annotate("text", x = as.Date("2020-03-19"), y = 5600, 
+           label = paste0("Italy = ", dat_countries$Deaths[2 * (dim(dat_countries)[1]/3)]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-19"), y = 500, 
-           label = paste0("US = ", dat_countries$Deaths[180]), 
+  annotate("text", x = as.Date("2020-03-20"), y = 600, 
+           label = paste0("US = ", dat_countries$Deaths[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
-  ggtitle("Deaths as of March 21 2020")
+  ggtitle("Deaths as of March 22 2020")
 
 
 # recovery
@@ -147,15 +147,15 @@ head(dat_countries)
 ggplot(dat_countries, aes(x = Day, y = Recoveries, Country)) +
   geom_step(aes(color = Country), direction = "vh", type = "S") +
   annotate("text", x = as.Date("2020-03-17"), y = 74000, 
-           label = paste0("China = ", dat_countries$Recoveries[60]), 
+           label = paste0("China = ", dat_countries$Recoveries[dim(dat_countries)[1]/3]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-20"), y = 7500, 
-           label = paste0("Italy = ", dat_countries$Recoveries[120]), 
+  annotate("text", x = as.Date("2020-03-21"), y = 8600, 
+           label = paste0("Italy = ", dat_countries$Recoveries[2 * (dim(dat_countries)[1]/3)]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-19"), y = 1500, 
-           label = paste0("US = ", dat_countries$Recoveries[180]), 
+  annotate("text", x = as.Date("2020-03-21"), y = 1500, 
+           label = paste0("US = ", dat_countries$Recoveries[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
-  ggtitle("Recoveries as of March 21 2020")
+  ggtitle("Recoveries as of March 22 2020")
 
 
 
@@ -827,4 +827,15 @@ ggplot(economics, aes(x = date, y = unemploy/pop)) +
 # ggplot(fish.tidy, aes(x = Year, y = Capture, color = Species)) +
 #   geom_line()
 
+library(AlphaVantageClient)
+AlphaVantageClient::setAPIKey("5WDQCT252ZT5CSKB")
+example_prices <- fetchSeries(function_nm = "time_series_daily", symbol = "msft")
+example_quotes <- fetchSeries(function_nm = "currency_exchange_rate", from_symbol = "EUR", to_symbol = "USD", datatype = "csv")
 
+library(xts)
+
+library(tidyverse)
+dat_confirmed <- read_csv("./time_series_19-covid-Confirmed.csv")
+dat_deaths <- read_csv("./time_series_19-covid-Deaths.csv")
+dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
+eurusd <- read_csv("./fx_daily_EUR_USD.csv")
