@@ -18,51 +18,19 @@ install.packages("rJava")
 ######## load data #####################
 
 ### libraries
-library(astsa)
 library(xts)
-
 library(tidyverse)
-dat_confirmed_ny <- read_csv("./time_series_19-covid-Confirmed.csv")
-dat_deaths_ny <- read_csv("./time_series_19-covid-Deaths.csv")
+
+dat_confirmed <- read_csv("./time_series_covid19_confirmed_global.csv")
+dat_deaths <- read_csv("./time_series_covid19_deaths_global.csv")
 # dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
-
-#dat_confirmed <- read_csv("./time_series_covid19_confirmed_global.csv")
-#dat_deaths <- read_csv("./time_series_covid19_deaths_global.csv")
-# dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
-
-
-## get daily figures
-# dat_daily <- read_csv("./daily_03-21-2020.csv")
-# str(dat_daily)
-# dat_daily %<>% select(., -c(Latitude, Longitude))
-
-# select countries
-# countries <- c("China", "Italy", "Spain", "US", "Germany")
-# daily_country <- filter(dat_daily, `Country/Region` == countries) 
-# 
-# daily_confirmed <- dat_daily %>% group_by(`Country/Region`) %>% 
-#   summarise(ConfCount = sum(Confirmed, na.rm = TRUE)) %>%
-#   filter(ConfCount > 5000)
-# daily_confirmed
-# daily_country[1:20,]
-
-#dat_nums <- dat_confirmed[, c(5:ncol(dat_confirmed))]
-#confirmed_mat <- colSums(dat_nums)
-#march_nums <- confirmed_mat[, c('3/1/20', )]
-#col_dates <- as.Date(names(confirmed_mat), format = "%m/%d/%y")
-#plot(confirmed_mat, pch = "+")
-#names(confirmed_mat)
-#barplot(confirmed_mat)
 
 ########  CONFIRMED   ##########
 
 library(tidyr)
 library(magrittr)
 
-countries <- c("China", "Italy", "US")
-
-# load data for confirmed
-dat_dates <- dat_confirmed %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
+countries <- c("China", "Italy", "Spain", "US")
 
 dat_tidy <- dat_confirmed %>% 
   gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) %>%
@@ -79,16 +47,20 @@ for(c in countries) {
 
 ggplot(dat_countries, aes(x = Day, y = ConfirmedCases, Country)) +
   geom_step(aes(color = Country), direction = "vh", type = "S") +
-  annotate("text", x = as.Date("2020-03-18"), y = 79000, 
-           label = paste0("China = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]/3]), 
+  annotate("text", x = as.Date("2020-03-21"), y = 79000, 
+           label = paste0("China = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]/4]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-20"), y = 67000, 
-           label = paste0("Italy = ", dat_countries$ConfirmedCases[2 * (dim(dat_countries)[1]/3)]), 
+  annotate("text", x = as.Date("2020-03-22"), y = 66000, 
+           label = paste0("Italy = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]/2]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-21"), y = 46000, 
+  annotate("text", x = as.Date("2020-03-22"), y = 37000, 
+           label = paste0("Spain = ", dat_countries$ConfirmedCases[3 * (dim(dat_countries)[1])/4]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-22"), y = 46000, 
            label = paste0("US = ", dat_countries$ConfirmedCases[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
-  ggtitle("Confirmed Cases as of March 22 2020")
+  ggtitle(paste0("Confirmed Cases as of ", dat_countries$Day[dim(dat_countries)[1]]))
+  #ggtitle("Confirmed Cases as of March 22 2020")
 
 
 # deaths
@@ -116,15 +88,19 @@ head(dat_countries)
 ggplot(dat_countries, aes(x = Day, y = Deaths, Country)) +
   geom_step(aes(color = Country), direction = "vh", type = "S") +
   annotate("text", x = as.Date("2020-03-13"), y = 3400, 
-           label = paste0("China = ", dat_countries$Deaths[dim(dat_countries)[1]/3]), 
+           label = paste0("China = ", dat_countries$Deaths[dim(dat_countries)[1]/4]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-19"), y = 6300, 
-           label = paste0("Italy = ", dat_countries$Deaths[2 * (dim(dat_countries)[1]/3)]), 
+  annotate("text", x = as.Date("2020-03-21"), y = 6300, 
+           label = paste0("Italy = ", dat_countries$Deaths[dim(dat_countries)[1]/2]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-20"), y = 800, 
+  annotate("text", x = as.Date("2020-03-21"), y = 2500, 
+           label = paste0("Spain = ", dat_countries$Deaths[3 * (dim(dat_countries)[1]/4)]), 
+           fontface = "bold", size = 3) +
+  annotate("text", x = as.Date("2020-03-22"), y = 700, 
            label = paste0("US = ", dat_countries$Deaths[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
-  ggtitle("Deaths as of March 22 2020")
+  ggtitle(paste0("Deaths as of ", dat_countries$Day[dim(dat_countries)[1]]))
+  #ggtitle("Deaths as of March 22 2020")
 
 
 # recovery
@@ -151,20 +127,23 @@ head(dat_countries)
 
 ggplot(dat_countries, aes(x = Day, y = Recoveries, Country)) +
   geom_step(aes(color = Country), direction = "vh", type = "S") +
-  annotate("text", x = as.Date("2020-03-17"), y = 74000, 
+  annotate("text", x = as.Date("2020-03-22"), y = 3100, 
            label = paste0("China = ", dat_countries$Recoveries[dim(dat_countries)[1]/3]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-21"), y = 8600, 
+  annotate("text", x = as.Date("2020-03-21"), y = 6250, 
            label = paste0("Italy = ", dat_countries$Recoveries[2 * (dim(dat_countries)[1]/3)]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-21"), y = 1500, 
+  annotate("text", x = as.Date("2020-03-21"), y = 800, 
            label = paste0("US = ", dat_countries$Recoveries[dim(dat_countries)[1]]), 
            fontface = "bold", size = 3) +
-  ggtitle("Recoveries as of March 22 2020")
+  ggtitle("Recoveries as of March 23 2020")
 
 
 
+##### plot plots #####
 
+# load data for confirmed
+dat_dates <- dat_confirmed %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
 
 ### US
 US_dat <- dat_dates %>%
@@ -186,67 +165,36 @@ plot(US_xts, type = "S",
                   "\nAs of:", time(US_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
-
-# NY
-# NY
-# NY 
 ### NY
 
-library(xts)
+## NY 24-03-2020
 
-library(tidyverse)
-dat_confirmed_ny <- read_csv("./time_series_19-covid-Confirmed.csv")
-dat_deaths_ny <- read_csv("./time_series_19-covid-Deaths.csv")
+# restore NY_xts
+# NY_xts_res <- readRDS(file = "./NY_xts_23-03-2020.rds")
 
-dat_dates_ny <- dat_confirmed_ny %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long'))
+dat_ny <- read_csv("./03-23-2020.csv")
 
-NY_dat <- dat_dates_ny %>%
-  filter(`Country/Region` == "US") %>%
-  filter(`Province/State` == "New York")
+dat_nycount <- dat_ny %>%
+  select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
+  mutate(Last_Update = as.Date(Last_Update)) %>% 
+  group_by(Province_State) %>%
+  summarise(Count = sum(Confirmed, na.rm = TRUE)) %>%
+  filter(Province_State == "New York")
 
-# convert Day from 'chr' to 'Date'
-NY_dat %<>%
-  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
-  select(c(Day, Cases)) %>%
-  group_by(Day) %>%
-  summarise(CaseCount = sum(Cases, na.rm = TRUE))
+dat_nycount
+update_ny <- xts(dat_nycount$Count, as.Date("2020-03-23"))
+names(update_ny) <- "Count"
+NY_xts <- rbind(NY_xts, update_ny)
 
-NY_xts <- xts(NY_dat$CaseCount, order.by = NY_dat$Day)
-names(NY_xts) <- "Count"
+# save current xts to file
+saveRDS(NY_xts, file = "./NY_xts_23-03-2020.rds")
+
 curr_len <- nrow(NY_xts)
 plot(NY_xts, type = "S", 
      main = paste("NY Confirmed Cases:", as.numeric(NY_xts$Count[curr_len]),
                   "\nAs of:", time(NY_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
-rm(dat_confirmed_ny, dat_deaths_ny, dat_dates_ny, NY_dat, curr_len)
-
-
-# NY DEATHS
-dat_dates_nyd <- dat_deaths_ny %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long'))
-
-NY_datd <- dat_dates_nyd %>%
-  filter(`Country/Region` == "US") %>%
-  filter(`Province/State` == "New York")
-
-# convert Day from 'chr' to 'Date'
-NY_datd %<>%
-  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
-  select(c(Day, Cases)) %>%
-  group_by(Day) %>%
-  summarise(CaseCount = sum(Cases, na.rm = TRUE))
-
-NY_xtsd <- xts(NY_datd$CaseCount, order.by = NY_datd$Day)
-names(NY_xtsd) <- "Count"
-curr_len <- nrow(NY_xtsd)
-plot(NY_xtsd, type = "S", 
-     main = paste("NY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
-                  "\nAs of:", time(NY_xtsd[curr_len])), 
-     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
-
-rm(dat_deaths_ny, dat_dates_nyd, NY_datd, curr_len)
-
-# NY DEATHS
 
 ### Italy
 IT_dat <- dat_dates %>%
@@ -327,24 +275,55 @@ plot(US_Ds_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### NY
-NY_Ds <- dat_Ds %>%
-  filter(`Country/Region` == "US") %>%
-  filter(`Province/State` == "New York")
+# NY_Ds <- dat_Ds %>%
+#   filter(`Country/Region` == "US") %>%
+#   filter(`Province/State` == "New York")
+# 
+# # convert Day from 'chr' to 'Date'
+# NY_Ds %<>%
+#   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+#   select(c(Day, Cases)) %>%
+#   group_by(Day) %>%
+#   summarise(CaseCount = sum(Cases))
 
-# convert Day from 'chr' to 'Date'
-NY_Ds %<>%
-  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
-  select(c(Day, Cases)) %>%
-  group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
+# NY_Ds_xts <- xts(NY_Ds$CaseCount, order.by = NY_Ds$Day)
+# names(NY_Ds_xts) <- "Count"
 
-NY_Ds_xts <- xts(NY_Ds$CaseCount, order.by = NY_Ds$Day)
-names(NY_Ds_xts) <- "Count"
-curr_len <- nrow(NY_Ds_xts)
-plot(NY_Ds_xts, type = "S", 
-     main = paste("NY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len]),
-                  "\nAs of:", time(NY_Ds_xts[curr_len])), 
+
+## NY 24-03-2020
+
+# restore NY_xtsd
+# NY_xts_resd <- readRDS(file = "./NY_xtsd_23-03-2020.rds")
+
+dat_nyd <- read_csv("./03-23-2020.csv")
+
+dat_nycountd <- dat_nyd %>%
+  select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
+  mutate(Last_Update = as.Date(Last_Update)) %>% 
+  group_by(Province_State) %>%
+  summarise(Count = sum(Deaths, na.rm = TRUE)) %>%
+  filter(Province_State == "New York")
+
+dat_nycountd
+update_nyd <- xts(dat_nycountd$Count, as.Date("2020-03-23"))
+names(update_nyd) <- "Count"
+NY_xtsd <- rbind(NY_xtsd, update_nyd)
+
+# save current xts to file
+saveRDS(NY_xtsd, file = "./NY_xtsd_23-03-2020.rds")
+
+curr_len <- nrow(NY_xtsd)
+plot(NY_xtsd, type = "S", 
+     main = paste("NY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
+                  "\nAs of:", time(NY_xtsd[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+
+# curr_len <- nrow(NY_xtsd)
+# plot(NY_xtsd, type = "S", 
+#      main = paste("NY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
+#                   "\nAs of:", time(NY_xtsd[curr_len])), 
+#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 
 ### Italy
@@ -371,11 +350,11 @@ plot(IT_Ds_xts, type = "S",
 #par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
 plot(IT_Ds_xts, type = "S", 
      main = paste("Italy Deaths:", as.numeric(IT_Ds_xts$Count[curr_len]),
-                  "\nNY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len]),
+                  "\nNY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
                   "\nUS Deaths:", as.numeric(US_Ds_xts$Count[curr_len]),
                   "                                                     Date:", time(IT_Ds_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
-lines(NY_Ds_xts, type = "S", col = "blue")
+lines(NY_xtsd, type = "S", col = "blue")
 lines(US_Ds_xts, type = "S", col = "black")
 
 # plot(NY_Ds_xts, type = "S", 
@@ -390,11 +369,11 @@ lines(US_Ds_xts, type = "S", col = "black")
 ### double plots
 #par(mfrow = c(3, 1), mar = c(3, 3, 3, 3))
 plot(US_Ds_xts, type = "S", 
-     main = paste("\nNY Deaths:", as.numeric(NY_Ds_xts$Count[curr_len]),
+     main = paste("\nNY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
                   "\nUS Deaths:", as.numeric(US_Ds_xts$Count[curr_len]),
-                  "                                                     Date:", time(NY_Ds_xts[curr_len])), 
+                  "                                                     Date:", time(US_Ds_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
-lines(NY_Ds_xts, type = "S", col = "blue")
+lines(NY_xtsd, type = "S", col = "blue")
 #lines(US_Ds_xts, type = "S", col = "black")
 
 ##########  DEATHS END  ############
