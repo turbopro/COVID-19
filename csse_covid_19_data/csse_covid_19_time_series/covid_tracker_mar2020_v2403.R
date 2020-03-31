@@ -2,11 +2,8 @@
 
 
 # remove all variable except functions in environment
-rm(list = setdiff(ls(), lsf.str()))
-setwd("~/Documents/edu/AWS/repos/Gen_R/math_econ")
-load("~/Documents/edu/AWS/repos/Gen_R/math_econ/.RData")
-
-#rm(list = ls())
+#rm(list = setdiff(ls(), lsf.str()))
+rm(list = ls())
 
 ### rjava install ###
 Sys.getenv("JAVA_HOME")
@@ -15,25 +12,26 @@ install.packages("rJava")
 ## in terminal:
 ## apt-get install lib64pcre2-devel
 
-######## load data #####################
-
+### STEP 1 call libraries #####
 ### libraries
 library(xts)
 library(tidyverse)
+#library(tidyr)
+library(magrittr)
+library(reshape2)
+
 setwd("~/Documents/utils/covid-19/COVID-19/csse_covid_19_data/csse_covid_19_time_series")
 # set number display to non-scientific
 options(scipen=5)
 
+### STEP 2: Load Data ####
 dat_confirmed <- read_csv("./time_series_covid19_confirmed_global.csv")
 dat_deaths <- read_csv("./time_series_covid19_deaths_global.csv")
 dat_recovered <- read_csv("./time_series_covid19_recovered_global.csv")
 # dat_recovered <- read_csv("./time_series_19-covid-Recovered.csv")
 
-########  CONFIRMED   ##########
-
-library(tidyr)
-library(magrittr)
-
+### STEP 3: Do countries measures ##########
+# SET COUNTRIES
 countries <- c("Brazil", "China", "Italy", "Spain", "US")
 #countries <- c("US", "Italy", "China", "Spain", "Germany", "Iran", "France", "UK", "Switzerland", "Holland")
 
@@ -53,7 +51,7 @@ for(c in countries) {
 dat_conf
 
 ggplot(dat_conf, aes(x = Day, y = ConfirmedCases, Country)) +
-  geom_step(aes(color = Country), direction = "vh", type = "S") +
+  geom_step(aes(color = Country), direction = "vh") +
   annotate("text", x = as.Date("2020-03-10"), y = 130000, 
            label = paste0("Brazil = ", dat_conf$ConfirmedCases[dim(dat_conf)[1]/5]), 
            fontface = "bold", size = 3) +
@@ -71,19 +69,11 @@ ggplot(dat_conf, aes(x = Day, y = ConfirmedCases, Country)) +
            fontface = "bold", size = 3) +
   ggtitle(paste0("Confirmed Cases as of ", dat_conf$Day[dim(dat_conf)[1]]))
 
-#dat_conf %>% 
-#  group_by(Day, Country) %>%
-#  summarise(ConfirmedCount = sum(ConfirmedCases, na.rm = TRUE)) %>%
-#  group_by(Country) %>%
-#  summarise(ConfCount = sum(ConfirmedCount, na.rm = TRUE))
-
+### CREATE dat_curr_conf ####
 i <- 1
 dat_curr_conf <- NULL
 for(c in countries) {
   idx <- i * (dim(dat_conf)[1]) / length(countries)
-  # temp_df <- data.frame(Day = dat_conf$Day[i * (dim(dat_conf)[1])/5],
-  #                     Country = dat_conf$Country[i * (dim(dat_conf)[1])/5],
-  #                     Count = dat_conf$ConfirmedCases[i * (dim(dat_conf)[1])/5])
   temp_df <- data.frame(Day = dat_conf$Day[idx],
                         Country = dat_conf$Country[idx],
                         Count = dat_conf$ConfirmedCases[idx])
@@ -120,7 +110,7 @@ str(dat_death)
 head(dat_death)
 
 ggplot(dat_death, aes(x = Day, y = Deaths, Country)) +
-  geom_step(aes(color = Country), direction = "vh", type = "S") +
+  geom_step(aes(color = Country), direction = "vh") +
   annotate("text", x = as.Date("2020-03-10"), y = 9000, 
            label = paste0("Brazil = ", dat_death$Deaths[dim(dat_death)[1]/5]), 
            fontface = "bold", size = 3) +
@@ -140,13 +130,11 @@ ggplot(dat_death, aes(x = Day, y = Deaths, Country)) +
   #ggtitle("Deaths as of March 22 2020")
 
 
+### CREATE dat_curr_death ####
 i <- 1
 dat_curr_death <- NULL
 for(c in countries) {
   idx <- i * (dim(dat_death)[1]) / length(countries)
-  # temp_df <- data.frame(Day = dat_conf$Day[i * (dim(dat_conf)[1])/5],
-  #                     Country = dat_conf$Country[i * (dim(dat_conf)[1])/5],
-  #                     Count = dat_conf$ConfirmedCases[i * (dim(dat_conf)[1])/5])
   temp_df <- data.frame(Day = dat_death$Day[idx],
                         Country = dat_death$Country[idx],
                         Count = dat_death$Deaths[idx])
@@ -162,85 +150,6 @@ ggplot(dat_curr_death, aes(x = reorder(Country, Count), y = Count, fill = Countr
   #scale_colour_brewer()
   #scale_fill_brewer(direction = -1) + 
   coord_flip()
-
-### do the dat_curr for all three
-dat_curr <- dat_curr_death[,-3]
-dat_curr$Confirmed <- dat_curr_conf$Count
-dat_curr$Deaths <- dat_curr_death$Count
-dat_curr$Recoveries <- dat_curr_recov$Count
-
-
-dat_curr.m <- dat_curr[,-1]
-dat_curr.m <- melt(dat_curr.m, id.vars='Country')
-names(dat_curr.m) <- c("Country", "Measures", "value")
-
-ggplot(dat_curr.m, aes(x = Country, y = value)) +   
-  geom_bar(aes(fill = variable), position = "dodge", stat="identity")
-
-
-ggplot(dat_curr.m, aes(x = reorder(Country, -value), y = value, fill = Measures)) +
-  #geom_bar(aes(fill = variable), position = "dodge", stat="identity")
-  geom_col(width = 0.5, position = position_dodge()) +
-  #geom_col(width = 0.5) +
-  #geom_col(fill = "skyblue", width = 0.5) +
-  #geom_col(width = 0.5) +
-  geom_text(aes(label=value), hjust=0, vjust=0) +
-  ggtitle("Stats for 27 March 2020") +
-  xlab("Country/Region") +
-  ylab("Number of Cases") +
-  #scale_colour_brewer()
-  #scale_fill_brewer(palette = "Accent", direction = -1)
-  scale_fill_brewer(palette = "Blues", direction = -1) +
-  #theme_bw()
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "grey"))
-  #scale_colour_gradient(direction = -1)
-  #coord_flip()
-
-
-######## MERGE GLOBAL WITH NY ##########
-# merge global with NY
-# go down to 369
-# to get dat_curr_ny
-
-dat_curr_ny
-
-#test10 <- dat_curr_ny[4, ]
-#test10 <- rbind(test10, dat_curr_ny[2,])
-#test10 <- rbind(test10, dat_curr_ny[1,])
-#test10 <- rbind(test10, dat_curr_ny[3,])
-#test10 <- rbind(test10, dat_curr_ny[5,])
-#test10
-
-dat_curr.m <- dat_curr_ny[,-1]
-dat_curr.m
-dat_curr.m <- melt(dat_curr.m, id.vars='Country')
-names(dat_curr.m) <- c("Country", "Measures", "value")
-dat_curr.m$Country <- factor(dat_curr.m$Country, levels = c("US", "Italy", "China", "Spain", "NY"))
-
-#ggplot(dat_curr.m, aes(x = Country, y = value)) +   
-#  geom_bar(aes(fill = variable), position = "dodge", stat="identity")
-
-
-ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
-#ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
-  #geom_bar(aes(fill = variable), position = "dodge", stat="identity")
-  geom_col(width = 0.8, position = position_dodge()) +
-  geom_text(aes(label=value), position = position_dodge(width=0.8), size=3, vjust=-0.5) +
-  labs(title = "Confirmed Cases, Deaths and Recovered\nChina, Italy, Spain, US and New York",
-       subtitle = "29 March 2020",
-       caption = "data from JHU COVID-19 Github page") +
-  xlab("Country/Region") +
-  ylab("Number of Cases") +
-  scale_fill_brewer(palette = "Paired") +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-        panel.background = element_blank(), axis.line = element_line(colour = "grey"),
-        plot.title = element_text(hjust = 0.5, color = "blue", face = "bold"), 
-        plot.subtitle = element_text(hjust = 1, colour = "blue", size = 11),
-        plot.caption = element_text(size = 8, face = "italic"))
-#scale_colour_gradient(direction = -1)
-#coord_flip()
-
 
 
 # recovery
@@ -266,7 +175,7 @@ str(dat_recoveries)
 head(dat_recoveries)
 
 ggplot(dat_recoveries, aes(x = Day, y = Recoveries, Country)) +
-  geom_step(aes(color = Country), direction = "vh", type = "S") +
+  geom_step(aes(color = Country), direction = "vh") +
   annotate("text", x = as.Date("2020-03-10"), y = 50000, 
            label = paste0("Brazil = ", dat_recoveries$Recoveries[dim(dat_recoveries)[1]/5]), 
            fontface = "bold", size = 3) +
@@ -286,13 +195,11 @@ ggplot(dat_recoveries, aes(x = Day, y = Recoveries, Country)) +
   #ggtitle("Recoveries as of March 23 2020")
 
 
+### CREATE dat_curr_recov ####
 i <- 1
 dat_curr_recov <- NULL
 for(c in countries) {
   idx <- i * (dim(dat_recoveries)[1]) / length(countries)
-  # temp_df <- data.frame(Day = dat_conf$Day[i * (dim(dat_conf)[1])/5],
-  #                     Country = dat_conf$Country[i * (dim(dat_conf)[1])/5],
-  #                     Count = dat_conf$ConfirmedCases[i * (dim(dat_conf)[1])/5])
   temp_df <- data.frame(Day = dat_recoveries$Day[idx],
                         Country = dat_recoveries$Country[idx],
                         Count = dat_recoveries$Recoveries[idx])
@@ -309,11 +216,80 @@ ggplot(dat_curr_recov, aes(x = reorder(Country, Count), y = Count, fill = Countr
   #scale_fill_brewer(direction = -1) + 
   coord_flip()
 
+###
 
-##### plot plots #####
+### STEP 4: CREATE dat_curr ####
+dat_curr <- dat_curr_death[,-3]
+dat_curr$Confirmed <- dat_curr_conf$Count
+dat_curr$Deaths <- dat_curr_death$Count
+dat_curr$Recoveries <- dat_curr_recov$Count
+dat_curr
+
+# dat_curr.m <- dat_curr[,-1]
+# dat_curr.m <- melt(dat_curr.m, id.vars='Country')
+# names(dat_curr.m) <- c("Country", "Measures", "value")
+# 
+# ggplot(dat_curr.m, aes(x = Country, y = value)) +   
+#   geom_bar(aes(fill = variable), position = "dodge", stat="identity")
+# 
+# 
+# ggplot(dat_curr.m, aes(x = reorder(Country, -value), y = value, fill = Measures)) +
+#   #geom_bar(aes(fill = variable), position = "dodge", stat="identity")
+#   geom_col(width = 0.5, position = position_dodge()) +
+#   #geom_col(width = 0.5) +
+#   #geom_col(fill = "skyblue", width = 0.5) +
+#   #geom_col(width = 0.5) +
+#   geom_text(aes(label=value), hjust=0, vjust=0) +
+#   ggtitle("Stats for 27 March 2020") +
+#   xlab("Country/Region") +
+#   ylab("Number of Cases") +
+#   #scale_colour_brewer()
+#   #scale_fill_brewer(palette = "Accent", direction = -1)
+#   scale_fill_brewer(palette = "Blues", direction = -1) +
+#   #theme_bw()
+#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+#         panel.background = element_blank(), axis.line = element_line(colour = "grey"))
+#scale_colour_gradient(direction = -1)
+#coord_flip()
 
 
+### STEP 7: Merge countries & NY ##########
+# merge global with NY
+# go down to 572
+# to get dat_curr_ny
 
+dat_curr_ny
+
+dat_curr.m <- dat_curr_ny[,-1]
+dat_curr.m
+dat_curr.m <- melt(dat_curr.m, id.vars='Country')
+names(dat_curr.m) <- c("Country", "Measures", "value")
+dat_curr.m$Country <- factor(dat_curr.m$Country, levels = c("US", "Italy", "China", "Spain", "NY"))
+
+ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
+  #ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
+  #geom_bar(aes(fill = variable), position = "dodge", stat="identity")
+  geom_col(width = 0.8, position = position_dodge()) +
+  geom_text(aes(label=value), position = position_dodge(width=0.8), size=3, vjust=-0.5) +
+  labs(title = "Confirmed Cases, Deaths and Recovered\nChina, Italy, Spain, US and New York",
+       subtitle = "29 March 2020",
+       caption = "data from JHU COVID-19 Github page") +
+  xlab("Country/Region") +
+  ylab("Number of Cases") +
+  scale_fill_brewer(palette = "Paired") +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "grey"),
+        plot.title = element_text(hjust = 0.5, color = "blue", face = "bold"), 
+        plot.subtitle = element_text(hjust = 1, colour = "blue", size = 11),
+        plot.caption = element_text(size = 8, face = "italic"))
+#scale_colour_gradient(direction = -1)
+#coord_flip()
+
+
+###
+
+##### PLOT PLOTS #####
+### STEP 5: Create NY & US plots ####
 # load data for confirmed
 dat_dates <- dat_confirmed %>% gather(Day, Cases, -c('Province/State', 'Country/Region', 'Lat', 'Long')) 
 
@@ -337,14 +313,8 @@ plot(US_xts, type = "S",
                   "\nAs of:", time(US_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
-### NY
-
-## NY 24-03-2020
-
-# restore NY_xts
-# NY_xts_res <- readRDS(file = "./NY_xts_23-03-2020.rds")
-
-dat_ny <- read_csv("./03-29-2020.csv")
+### CREATE NY_xts, NY Confirmed ####
+dat_ny <- read_csv("./03-30-2020.csv")
 
 dat_nycount <- dat_ny %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -354,12 +324,12 @@ dat_nycount <- dat_ny %>%
   filter(Province_State == "New York")
 
 dat_nycount
-update_ny <- xts(dat_nycount$Count, as.Date("2020-03-29"))
+update_ny <- xts(dat_nycount$Count, as.Date("2020-03-30"))
 names(update_ny) <- "Count"
 NY_xts <- rbind(NY_xts_28032020, update_ny)
 
 # save current xts to file
-saveRDS(NY_xts, file = "./NY_xts_29032020.rds")
+saveRDS(NY_xts, file = "./NY_xts_30032020.rds")
 
 curr_len <- nrow(NY_xts)
 plot(NY_xts, type = "S", 
@@ -367,27 +337,7 @@ plot(NY_xts, type = "S",
                   "\nAs of:", time(NY_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
-
-######## MERGE NY CONF DEATHS RECOV ##########
-## merge NY confirmed and deaths and recovered with global
-## from above line = 
-test00 <- data.frame(Day = as.Date("2020-03-29"), Country = "NY", 
-                     Confirmed = coredata(NY_xts)[length(NY_xts)],
-                     Deaths = coredata(NY_xtsd)[length(NY_xtsd)],
-                     Recoveries = 0)
-#names(test00) <- c("Day", "Country", "Confirmed", "Deaths")
-test00
-dat_curr
-dat_curr_ny <- rbind(dat_curr, test00)
-dat_curr_ny <- dat_curr_ny[-1,]
-dat_curr_ny
-
-
-test01 <- data.frame(Country = "NY", 
-                     NY_xts$Count[length(NY_xts)],
-                     NY_xtsd$Count[length(NY_xtsd)])
-test01
-
+###
 
 ### Italy
 IT_dat <- dat_dates %>%
@@ -460,28 +410,8 @@ plot(US_Ds_xts, type = "S",
                   "\nAs of:", time(US_Ds_xts[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
-### NY
-# NY_Ds <- dat_Ds %>%
-#   filter(`Country/Region` == "US") %>%
-#   filter(`Province/State` == "New York")
-# 
-# # convert Day from 'chr' to 'Date'
-# NY_Ds %<>%
-#   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
-#   select(c(Day, Cases)) %>%
-#   group_by(Day) %>%
-#   summarise(CaseCount = sum(Cases))
-
-# NY_Ds_xts <- xts(NY_Ds$CaseCount, order.by = NY_Ds$Day)
-# names(NY_Ds_xts) <- "Count"
-
-
-## NY 24-03-2020
-
-# restore NY_xtsd
-# NY_xts_resd <- readRDS(file = "./NY_xtsd_23-03-2020.rds")
-
-dat_nyd <- read_csv("./03-29-2020.csv")
+### CREATE NY_xtsd, NY Deaths ####
+dat_nyd <- read_csv("./03-30-2020.csv")
 
 dat_nycountd <- dat_nyd %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -491,25 +421,18 @@ dat_nycountd <- dat_nyd %>%
   filter(Province_State == "New York")
 
 dat_nycountd
-update_nyd <- xts(dat_nycountd$Count, as.Date("2020-03-29"))
+update_nyd <- xts(dat_nycountd$Count, as.Date("2020-03-30"))
 names(update_nyd) <- "Count"
-NY_xtsd <- rbind(NY_xtsd_28032020, update_nyd)
+NY_xtsd <- rbind(NY_xtsd_29032020, update_nyd)
 
 # save current xts to file
-saveRDS(NY_xtsd, file = "./NY_xtsd_29032020.rds")
+saveRDS(NY_xtsd, file = "./NY_xtsd_30032020.rds")
 
 curr_len <- nrow(NY_xtsd)
 plot(NY_xtsd, type = "S", 
      main = paste("NY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
                   "\nAs of:", time(NY_xtsd[curr_len])), 
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
-
-
-# curr_len <- nrow(NY_xtsd)
-# plot(NY_xtsd, type = "S", 
-#      main = paste("NY Deaths:", as.numeric(NY_xtsd$Count[curr_len]),
-#                   "\nAs of:", time(NY_xtsd[curr_len])), 
-#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 
 ### Italy
@@ -581,24 +504,24 @@ plot(US_Rs_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### NY
-NY_Rs <- dat_Rs %>%
-  filter(`Country/Region` == "US") %>%
-  filter(`Province/State` == "New York")
-
-# convert Day from 'chr' to 'Date'
-NY_Rs %<>%
-  mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
-  select(c(Day, Cases)) %>%
-  group_by(Day) %>%
-  summarise(CaseCount = sum(Cases))
-
-NY_Rs_xts <- xts(NY_Rs$CaseCount, order.by = NY_Rs$Day)
-names(NY_Rs_xts) <- "Count"
-curr_len <- nrow(NY_Rs_xts)
-plot(NY_Rs_xts, type = "S", 
-     main = paste("NY Recovered Cases:", as.numeric(NY_Rs_xts$Count[curr_len]),
-                  "\nAs of:", time(NY_Rs_xts[curr_len])), 
-     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+# NY_Rs <- dat_Rs %>%
+#   filter(`Country/Region` == "US") %>%
+#   filter(`Province/State` == "New York")
+# 
+# # convert Day from 'chr' to 'Date'
+# NY_Rs %<>%
+#   mutate(Day = as.Date(Day, format = "%m/%d/%y")) %>%
+#   select(c(Day, Cases)) %>%
+#   group_by(Day) %>%
+#   summarise(CaseCount = sum(Cases))
+# 
+# NY_Rs_xts <- xts(NY_Rs$CaseCount, order.by = NY_Rs$Day)
+# names(NY_Rs_xts) <- "Count"
+# curr_len <- nrow(NY_Rs_xts)
+# plot(NY_Rs_xts, type = "S", 
+#      main = paste("NY Recovered Cases:", as.numeric(NY_Rs_xts$Count[curr_len]),
+#                   "\nAs of:", time(NY_Rs_xts[curr_len])), 
+#      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 
 ### Italy
@@ -644,7 +567,23 @@ plot(US_Rs_xts, type = "S",
 lines(NY_Rs_xts, type = "S", col = "blue")
 
 
+###
 
+### STEP 6: Merge NY conf deaths recov ##########
+## merge NY confirmed and deaths and recovered with global
+## from above line = 256
+test00 <- data.frame(Day = as.Date("2020-03-30"), Country = "NY", 
+                     Confirmed = coredata(NY_xts)[length(NY_xts)],
+                     Deaths = coredata(NY_xtsd)[length(NY_xtsd)],
+                     Recoveries = 0)
+#names(test00) <- c("Day", "Country", "Confirmed", "Deaths")
+test00
+dat_curr      # firstly do dat_curr from line: 225
+dat_curr_ny <- rbind(dat_curr, test00)
+dat_curr_ny <- dat_curr_ny[-1,]
+dat_curr_ny
+
+## GOTO: line 256
 
 #########  RECOVERY END ###########
 #########  Worldwide ##############
