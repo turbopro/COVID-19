@@ -225,37 +225,11 @@ dat_curr$Deaths <- dat_curr_death$Count
 dat_curr$Recoveries <- dat_curr_recov$Count
 dat_curr
 
-# dat_curr.m <- dat_curr[,-1]
-# dat_curr.m <- melt(dat_curr.m, id.vars='Country')
-# names(dat_curr.m) <- c("Country", "Measures", "value")
-# 
-# ggplot(dat_curr.m, aes(x = Country, y = value)) +   
-#   geom_bar(aes(fill = variable), position = "dodge", stat="identity")
-# 
-# 
-# ggplot(dat_curr.m, aes(x = reorder(Country, -value), y = value, fill = Measures)) +
-#   #geom_bar(aes(fill = variable), position = "dodge", stat="identity")
-#   geom_col(width = 0.5, position = position_dodge()) +
-#   #geom_col(width = 0.5) +
-#   #geom_col(fill = "skyblue", width = 0.5) +
-#   #geom_col(width = 0.5) +
-#   geom_text(aes(label=value), hjust=0, vjust=0) +
-#   ggtitle("Stats for 27 March 2020") +
-#   xlab("Country/Region") +
-#   ylab("Number of Cases") +
-#   #scale_colour_brewer()
-#   #scale_fill_brewer(palette = "Accent", direction = -1)
-#   scale_fill_brewer(palette = "Blues", direction = -1) +
-#   #theme_bw()
-#   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
-#         panel.background = element_blank(), axis.line = element_line(colour = "grey"))
-#scale_colour_gradient(direction = -1)
-#coord_flip()
 
 
 ### STEP 7: Merge countries & NY ##########
 # merge global with NY
-# go down to 572
+# go down to 567
 # to get dat_curr_ny
 
 dat_curr_ny
@@ -264,7 +238,7 @@ dat_curr.m <- dat_curr_ny[,-1]
 dat_curr.m
 dat_curr.m <- melt(dat_curr.m, id.vars='Country')
 names(dat_curr.m) <- c("Country", "Measures", "value")
-dat_curr.m$Country <- factor(dat_curr.m$Country, levels = c("US", "Italy", "China", "Spain", "NY"))
+dat_curr.m$Country <- factor(dat_curr.m$Country, levels = c("US", "Italy", "Spain", "China", "NY"))
 
 ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
   #ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
@@ -314,7 +288,7 @@ plot(US_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### CREATE NY_xts, NY Confirmed ####
-dat_ny <- read_csv("./03-30-2020.csv")
+dat_ny <- read_csv("./03-31-2020.csv")
 
 dat_nycount <- dat_ny %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -324,12 +298,12 @@ dat_nycount <- dat_ny %>%
   filter(Province_State == "New York")
 
 dat_nycount
-update_ny <- xts(dat_nycount$Count, as.Date("2020-03-30"))
+update_ny <- xts(dat_nycount$Count, as.Date("2020-03-31"))
 names(update_ny) <- "Count"
-NY_xts <- rbind(NY_xts_29032020, update_ny)
+NY_xts <- rbind(NY_xts_30032020, update_ny)
 
 # save current xts to file
-saveRDS(NY_xts, file = "./NY_xts_30032020.rds")
+saveRDS(NY_xts, file = "./NY_xts_31032020.rds")
 
 curr_len <- nrow(NY_xts)
 plot(NY_xts, type = "S", 
@@ -409,7 +383,7 @@ plot(US_Ds_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### CREATE NY_xtsd, NY Deaths ####
-dat_nyd <- read_csv("./03-30-2020.csv")
+dat_nyd <- read_csv("./03-31-2020.csv")
 
 dat_nycountd <- dat_nyd %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -419,12 +393,12 @@ dat_nycountd <- dat_nyd %>%
   filter(Province_State == "New York")
 
 dat_nycountd
-update_nyd <- xts(dat_nycountd$Count, as.Date("2020-03-30"))
+update_nyd <- xts(dat_nycountd$Count, as.Date("2020-03-31"))
 names(update_nyd) <- "Count"
-NY_xtsd <- rbind(NY_xtsd_29032020, update_nyd)
+NY_xtsd <- rbind(NY_xtsd_30032020, update_nyd)
 
 # save current xts to file
-saveRDS(NY_xtsd, file = "./NY_xtsd_30032020.rds")
+saveRDS(NY_xtsd, file = "./NY_xtsd_31032020.rds")
 
 curr_len <- nrow(NY_xtsd)
 plot(NY_xtsd, type = "S", 
@@ -518,6 +492,31 @@ plot(US_Rs_xts, type = "S",
 #      main = paste("NY Recovered Cases:", as.numeric(NY_Rs_xts$Count[curr_len]),
 #                   "\nAs of:", time(NY_Rs_xts[curr_len])), 
 #      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
+### CREATE NY_xtsd, NY Deaths ####
+dat_nyr <- read_csv("./03-31-2020.csv")
+
+dat_nycountr <- dat_nyr %>%
+  select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
+  mutate(Last_Update = as.Date(Last_Update)) %>% 
+  group_by(Province_State) %>%
+  summarise(Count = sum(Recovered, na.rm = TRUE)) %>%
+  filter(Province_State == "New York")
+
+dat_nycountr
+update_nyr <- xts(dat_nycountr$Count, as.Date("2020-03-31"))
+names(update_nyr) <- "Count"
+#NY_xtsr <- rbind(NY_xtsr_30032020, update_nyr)
+
+# save current xts to file
+saveRDS(NY_xtsr, file = "./NY_xtsr_31032020.rds")
+
+curr_len <- nrow(NY_xtsr)
+plot(NY_xtsr, type = "S", 
+     main = paste("NY Deaths:", as.numeric(NY_xtsr$Count[curr_len]),
+                  "\nAs of:", time(NY_xtsr[curr_len])), 
+     col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
+
 
 
 ### Italy
