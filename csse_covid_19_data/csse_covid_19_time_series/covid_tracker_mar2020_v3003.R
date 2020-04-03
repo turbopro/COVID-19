@@ -246,7 +246,7 @@ ggplot(dat_curr.m, aes(x = Country, y = value, fill = Measures)) +
   geom_col(width = 0.8, position = position_dodge()) +
   geom_text(aes(label=value), position = position_dodge(width=0.8), size=3, vjust=-0.5) +
   labs(title = "Confirmed Cases, Deaths and Recovered\nChina, Italy, Spain, US and New York",
-       subtitle = "31 March 2020",
+       subtitle = "02 March 2020",
        caption = "data from JHU COVID-19 Github page") +
   xlab("Country/Region") +
   ylab("Number of Cases") +
@@ -288,7 +288,7 @@ plot(US_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### CREATE NY_xts, NY Confirmed ####
-dat_ny <- read_csv("./04-01-2020.csv")
+dat_ny <- read_csv("./04-02-2020.csv")
 
 dat_nycount <- dat_ny %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -298,12 +298,12 @@ dat_nycount <- dat_ny %>%
   filter(Province_State == "New York")
 
 dat_nycount
-update_ny <- xts(dat_nycount$Count, as.Date("2020-04-01"))
+update_ny <- xts(dat_nycount$Count, as.Date("2020-04-02"))
 names(update_ny) <- "Count"
-NY_xts <- rbind(NY_xts_31032020, update_ny)
+NY_xts <- rbind(NY_xts_01042020, update_ny)
 
 # save current xts to file
-saveRDS(NY_xts, file = "./NY_xts_01042020.rds")
+saveRDS(NY_xts, file = "./NY_xts_02042020.rds")
 
 curr_len <- nrow(NY_xts)
 plot(NY_xts, type = "S", 
@@ -383,7 +383,7 @@ plot(US_Ds_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### CREATE NY_xtsd, NY Deaths ####
-dat_nyd <- read_csv("./04-01-2020.csv")
+dat_nyd <- read_csv("./04-02-2020.csv")
 
 dat_nycountd <- dat_nyd %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -393,12 +393,12 @@ dat_nycountd <- dat_nyd %>%
   filter(Province_State == "New York")
 
 dat_nycountd
-update_nyd <- xts(dat_nycountd$Count, as.Date("2020-04-01"))
+update_nyd <- xts(dat_nycountd$Count, as.Date("2020-04-02"))
 names(update_nyd) <- "Count"
-NY_xtsd <- rbind(NY_xtsd_31032020, update_nyd)
+NY_xtsd <- rbind(NY_xtsd_01042020, update_nyd)
 
 # save current xts to file
-saveRDS(NY_xtsd, file = "./NY_xtsd_01042020.rds")
+saveRDS(NY_xtsd, file = "./NY_xtsd_02042020.rds")
 
 curr_len <- nrow(NY_xtsd)
 plot(NY_xtsd, type = "S", 
