@@ -52,19 +52,19 @@ dat_conf
 
 ggplot(dat_conf, aes(x = Day, y = ConfirmedCases, Country)) +
   geom_step(aes(color = Country), direction = "vh") +
-  annotate("text", x = as.Date("2020-03-10"), y = 130000, 
+  annotate("text", x = as.Date("2020-03-10"), y = 220000, 
            label = paste0("Brazil = ", dat_conf$ConfirmedCases[dim(dat_conf)[1]/5]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-10"), y = 120000, 
+  annotate("text", x = as.Date("2020-03-10"), y = 200000, 
            label = paste0("China = ", dat_conf$ConfirmedCases[2 * (dim(dat_conf)[1])/5]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-10"), y = 110000, 
+  annotate("text", x = as.Date("2020-03-10"), y = 180000, 
            label = paste0("Italy = ", dat_conf$ConfirmedCases[3 * (dim(dat_conf)[1])/5]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-10"), y = 100000, 
+  annotate("text", x = as.Date("2020-03-10"), y = 160000, 
            label = paste0("Spain = ", dat_conf$ConfirmedCases[4 * (dim(dat_conf)[1])/5]), 
            fontface = "bold", size = 3) +
-  annotate("text", x = as.Date("2020-03-10"), y = 90000, 
+  annotate("text", x = as.Date("2020-03-10"), y = 140000, 
            label = paste0("US = ", dat_conf$ConfirmedCases[dim(dat_conf)[1]]), 
            fontface = "bold", size = 3) +
   ggtitle(paste0("Confirmed Cases as of ", dat_conf$Day[dim(dat_conf)[1]]))
