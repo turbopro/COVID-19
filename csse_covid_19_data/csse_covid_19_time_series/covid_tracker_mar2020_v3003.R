@@ -355,7 +355,7 @@ plot(US_xts, type = "S",
      col = "darkgreen", grid.col = "lightgrey", grid.ticks.lty = "dotted")
 
 ### CREATE NY_xts, NY Confirmed ####
-dat_ny <- read_csv("./04-07-2020.csv")
+dat_ny <- read_csv("./04-20-2020.csv")
 
 dat_nycount <- dat_ny %>%
   select(c(Province_State, Country_Region, Last_Update, Confirmed, Deaths, Recovered)) %>%
@@ -365,9 +365,9 @@ dat_nycount <- dat_ny %>%
   filter(Province_State == "New York")
 
 dat_nycount
-update_ny <- xts(dat_nycount$Count, as.Date("2020-04-07"))
+update_ny <- xts(dat_nycount$Count, as.Date("2020-04-20"))
 names(update_ny) <- "Count"
-NY_xts <- rbind(NY_xts_06042020, update_ny)
+NY_xts <- rbind(NY_xts_07042020, update_ny)
 
 # # save current xts to file
 # saveRDS(NY_xts, file = "./NY_xts_06042020.rds")
@@ -376,7 +376,7 @@ NY_xts <- rbind(NY_xts_06042020, update_ny)
 # NY_xts <- rbind(NY_xts_04042020, update_ny)
 
 # save current xts to file
-saveRDS(NY_xts, file = "./NY_xts_07042020.rds")
+saveRDS(NY_xts, file = "./NY_xts_20042020.rds")
 
 curr_len <- nrow(NY_xts)
 plot(NY_xts, type = "S", 
